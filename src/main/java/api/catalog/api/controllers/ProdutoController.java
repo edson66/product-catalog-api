@@ -2,16 +2,15 @@ package api.catalog.api.controllers;
 
 import api.catalog.api.domain.dadosCategoria.Categoria;
 import api.catalog.api.domain.dadosCategoria.CategoriaRepository;
-import api.catalog.api.domain.dadosProduto.DadosCadastroProduto;
+import api.catalog.api.domain.dadosProduto.*;
 
-import api.catalog.api.domain.dadosProduto.DadosCompletosProduto;
-import api.catalog.api.domain.dadosProduto.Produto;
-import api.catalog.api.domain.dadosProduto.ProdutoRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -50,5 +49,41 @@ public class ProdutoController {
         var listaDeProdutos = produtoRepository.findAll(pageable).map(DadosCompletosProduto::new);
 
         return ResponseEntity.ok(listaDeProdutos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity buscarPorId(@PathVariable Long id){
+        var produto = produtoRepository.getReferenceById(id);
+
+        return ResponseEntity.ok(new DadosCompletosProduto(produto));
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity atualizarDados(@PathVariable Long id, @RequestBody DadosAtualizacaoProdutos dados){
+        var produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado."));
+        if (dados.categoria() != null){
+            var categoria = categoriaRepository.findByNome(dados.categoria());
+            if (categoria == null){
+                categoria = categoriaRepository.save(new Categoria(dados.categoria()));
+            }
+            produto.atualizarInformacoes(dados,categoria);
+        }else{
+            produto.atualizarInformacoes(dados);
+        }
+
+        return ResponseEntity.ok().body(new DadosCompletosProduto(produto));
+
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity deletarProduto (@PathVariable Long id){
+        var produto = produtoRepository.getReferenceById(id);
+
+        produtoRepository.delete(produto);
+
+        return ResponseEntity.noContent().build();
     }
 }

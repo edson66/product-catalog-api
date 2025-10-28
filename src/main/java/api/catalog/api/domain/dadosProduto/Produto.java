@@ -39,4 +39,25 @@ public class Produto {
         this.estoque = dados.estoque();
         this.categoria = categoria;
     }
+
+    public void atualizarInformacoes(DadosAtualizacaoProdutos dados) {
+        if (dados.nome() != null){
+            this.nome = dados.nome();
+        }
+        if (dados.descricao() != null){
+            this.descricao = dados.descricao();
+        }
+        if (dados.valor() != null){
+            this.valor = dados.valor();
+        }
+        if (dados.estoque() != null){
+            this.estoque = dados.estoque();
+        }
+
+    }
+
+    public void atualizarInformacoes(DadosAtualizacaoProdutos dados,Categoria categoria) {
+        this.atualizarInformacoes(dados);
+        this.categoria = categoria;
+    }
 }
