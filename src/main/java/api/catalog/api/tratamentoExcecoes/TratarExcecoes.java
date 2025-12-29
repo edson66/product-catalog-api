@@ -16,8 +16,8 @@ import java.util.Map;
 public class TratarExcecoes {
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity erro404(){
-        return ResponseEntity.badRequest().build();
+    public ResponseEntity erro404(EntityNotFoundException ex){
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
